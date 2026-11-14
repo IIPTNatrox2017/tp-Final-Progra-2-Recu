@@ -40,7 +40,11 @@ public class MenuView
     {
         StringBuilder sb = new StringBuilder();
         
-        sb.append("\n\t" + title + "(Pagina " + page + ")\n\n");
+        sb.append("\n\t")
+                .append(title)
+                .append("(Pagina ")
+                .append(page)
+                .append(")\n\n");
         
         if(list.isEmpty() == true)
         {
@@ -52,23 +56,30 @@ public class MenuView
             
             for(String item : list)
             {
-                sb.append(++count + "." + item + "\n");
+                sb.append(++count)
+                        .append(". ")
+                        .append(item)
+                        .append("\n");
             }
             
             sb.append("\n");
             
             if(hasPrevious == true)
             {
-                sb.append(MenuConst.PREV.getValue() + ". Volver\n");
+                sb.append(MenuConst.PREV.getValue())
+                        .append(". Volver\n");
             }
             
             if(hasNext == true)
             {
-                sb.append(MenuConst.NEXT.getValue() + ". Siguiente\n");
+                sb.append(MenuConst.NEXT.getValue())
+                        .append(". Siguiente\n");
             }
         }
         
-        sb.append(MenuConst.EXIT.getValue() + ". Salir\n\n");
+        sb.append(MenuConst.EXIT.getValue())
+                .append(". Salir\n\n");
+        
         sb.append("Elegir opcion: ");
         
         return sb.toString();
