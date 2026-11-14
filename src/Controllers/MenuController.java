@@ -9,47 +9,50 @@ import Views.MenuView;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class MenuController
 {
-    HashMap<String, Menu> menuMap;
+    private final Scanner scanner;
+    private final Map<String, Menu> menuMap;
     
-    public MenuController()
+    public MenuController(Scanner scanner)
     {
-        menuMap = new HashMap<>();
+        this.scanner = scanner;
+        this.menuMap = new HashMap<>();
     }
     
     public Boolean addMenu(String key, Menu menu)
     {
-        if(menuMap.containsKey(key) == true)
+        if(this.menuMap.containsKey(key) == true)
         {
             return false;
         }
         
-        menuMap.put(key, menu);
+        this.menuMap.put(key, menu);
         
         return true;
     }
     
     public Menu updateMenu(String key, Menu menu)
     {
-        return menuMap.put(key, menu);
+        return this.menuMap.put(key, menu);
     }
     
     public Menu getMenu(String key)
     {
-        return menuMap.get(key);
+        return this.menuMap.get(key);
     }
     
     public Boolean removeMenu(String key)
     {
-        if (menuMap.containsKey(key) == false)
+        if (this.menuMap.containsKey(key) == false)
         {
             return false;
         }
         
-        menuMap.remove(key);
+        this.menuMap.remove(key);
         
         return true;
     }
@@ -63,8 +66,7 @@ public class MenuController
             throw new MenuDoNotExistsException("No such menu exists!");
         }
         
-        Scanner sc = new Scanner(System.in);
-        MenuView menuView = new MenuView(sc);
+        MenuView menuView = new MenuView(scanner);
         Integer opcion = MenuConst.INVALID_OPTION.getValue();
         
         do
@@ -94,5 +96,26 @@ public class MenuController
         );
         
         return menu.getLastIndexSelected();
+    }
+    
+    public Integer showMenuTemp(Menu menu)
+    {
+        String key = "__temporary_menu__";
+        this.addMenu(key, menu);
+        
+        try
+        {
+            return this.showMenu(key);
+        }
+        catch (MenuDoNotExistsException | GetItemsInPageException e)
+        {
+            new MenuView(scanner).showOpcionError("No se pudo mostrar el menú: " + e.getMessage());
+        }
+        finally
+        {
+            this.removeMenu(key);
+        }
+        
+        return MenuConst.INVALID_OPTION.getValue();
     }
 }
