@@ -52,12 +52,12 @@ public class Reserva
     
     public Habitacion getHabitacion(Integer idHabitacion)
     {
-        return this.habitaciones.stream().filter(h -> h.getIdHabitacion() == idHabitacion).findFirst().orElse(null);
+        return this.habitaciones.stream().filter(h -> h.getIdHabitacion().equals(idHabitacion)).findFirst().orElse(null);
     }
     
     public Boolean removeHabitacion(Integer idHabitacion)
     {
-        return this.habitaciones.removeIf(h -> h.getIdHabitacion() == idHabitacion);
+        return this.habitaciones.removeIf(h -> h.getIdHabitacion().equals(idHabitacion));
     }
     
     public LocalDate getFechaReserva()

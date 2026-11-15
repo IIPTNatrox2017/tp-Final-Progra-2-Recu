@@ -62,12 +62,12 @@ public class Ocupacion
     
     public Pasajero getPasajero(Integer idPasajero)
     {
-        return this.pasajeros.stream().filter(p -> p.getIdPasajero() == idPasajero).findFirst().orElse(null);
+        return this.pasajeros.stream().filter(p -> p.getIdPasajero().equals(idPasajero)).findFirst().orElse(null);
     }
     
     public Boolean removePasajero(Integer idPasajero)
     {
-        return this.pasajeros.removeIf(p -> p.getIdPasajero() == idPasajero);
+        return this.pasajeros.removeIf(p -> p.getIdPasajero().equals(idPasajero));
     }
     
     public LocalDate getCheckIn()
