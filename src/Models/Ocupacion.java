@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class Ocupacion
 {
-    private Integer idOcupacion;
+    private final Integer idOcupacion;
     private Habitacion habitacion;
     private final Set<Pasajero> pasajeros;
     private LocalDate checkIn;
@@ -26,11 +26,6 @@ public class Ocupacion
     public Integer getIdOcupacion()
     {
         return this.idOcupacion;
-    }
-    
-    public void setIdOcupacion(Integer idOcupacion)
-    {
-        this.idOcupacion = idOcupacion;
     }
     
     public Habitacion getHabitacion()

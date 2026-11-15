@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public abstract class Usuario extends Persona
 {
-    private Integer idUsuario;
+    private final Integer idUsuario;
     private String usuario;
     private String contrasenia;
     
@@ -24,11 +24,6 @@ public abstract class Usuario extends Persona
     public Integer getIdUsuario()
     {
         return this.idUsuario;
-    }
-    
-    public void setIdUsuario(Integer idUsuario)
-    {
-        this.idUsuario = idUsuario;
     }
     
     public String getUsuario()

@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class Reserva
 {
-    private Integer idReserva;
+    private final Integer idReserva;
     private final Set<Habitacion> habitaciones;
     private LocalDate fechaReserva;
     private LocalDate fechaCheckIn;
@@ -26,11 +26,6 @@ public class Reserva
     public Integer getIdReserva()
     {
         return this.idReserva;
-    }
-    
-    public void setIdReserva(Integer idReserva)
-    {
-        this.idReserva = idReserva;
     }
     
     public Set<Habitacion> getHabitaciones()

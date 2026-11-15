@@ -4,7 +4,7 @@ import java.util.Objects;
 
 public abstract class Persona
 {
-    private Integer idPersona;
+    private final Integer idPersona;
     private String dni;
     private String nombre;
     private String origen;
@@ -22,11 +22,6 @@ public abstract class Persona
     public Integer getIdPersona()
     {
         return this.idPersona;
-    }
-    
-    public void setIdPersona(Integer idPersona)
-    {
-        this.idPersona = idPersona;
     }
     
     public String getDni()
