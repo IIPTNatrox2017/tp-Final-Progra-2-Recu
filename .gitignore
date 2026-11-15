@@ -30,3 +30,5 @@ bin/
 .DS_Store
 
 .env
+/.idea/inspectionProfiles/Project_Default.xml
+/database/schema.sql
