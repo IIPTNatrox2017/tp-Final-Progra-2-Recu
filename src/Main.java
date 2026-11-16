@@ -763,7 +763,7 @@ void crudReservas(MenuController menus, ScannerView input, ReservasController co
                 }
             }
             case 3 -> controller.getAll().stream().filter(r -> r.getFechaCheckIn().toEpochDay() >= LocalDate.now()
-                    .toEpochDay()).forEach(System.out::println);
+                    .toEpochDay()).sorted(Comparator.comparing(Reserva::getFechaCheckIn)).forEach(System.out::println);
             case 4 ->
             {
                 LocalDate fecha = input.getLocalDate("Fecha a consultar");
@@ -928,7 +928,7 @@ void crudOcupaciones(MenuController menus, ScannerView input, OcupacionesControl
                 }
             }
             case 3 -> controller.getAll().stream().filter(o -> o.getCheckIn().toEpochDay() >= LocalDate.now()
-                    .toEpochDay()).forEach(System.out::println);
+                    .toEpochDay()).sorted(Comparator.comparing(Ocupacion::getCheckIn)).forEach(System.out::println);
             case 4 ->
             {
                 LocalDate fecha = input.getLocalDate("Fecha a consultar");
