@@ -2,6 +2,7 @@ package Controllers;
 
 import Exceptions.RepositoryWriteException;
 import Models.Ocupacion;
+import Models.Reserva;
 import Repositories.OcupacionRepository;
 import java.time.LocalDate;
 import java.util.Set;
@@ -53,6 +54,17 @@ public class OcupacionesController extends GenericController<Ocupacion>
     protected void updateRepository(Ocupacion element) throws RepositoryWriteException
     {
         new OcupacionRepository().update(element);
+    }
+
+    public Ocupacion addFromReserva(Ocupacion ocupacion, Reserva reserva)
+            throws RepositoryWriteException
+    {
+        Ocupacion ocupacionCreada = new OcupacionRepository()
+                .insertFromReserva(ocupacion, reserva.getIdReserva());
+        
+        this.elementos.add(ocupacionCreada);
+        
+        return ocupacionCreada;
     }
 
     public Set<Ocupacion> obtenerOcupacionesDelDia(LocalDate fecha)

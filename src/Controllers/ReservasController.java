@@ -2,6 +2,7 @@ package Controllers;
 
 import Exceptions.RepositoryWriteException;
 import Models.Reserva;
+import Models.Pasajero;
 import Repositories.ReservaRepository;
 import java.time.LocalDate;
 import java.util.Set;
@@ -52,6 +53,39 @@ public class ReservasController extends GenericController<Reserva>
     protected void updateRepository(Reserva element) throws RepositoryWriteException
     {
         new ReservaRepository().update(element);
+    }
+
+    public Boolean addConPasajero(Reserva reserva, Pasajero pasajero)
+            throws RepositoryWriteException
+    {
+        Reserva reservaCreada = this.addRepository(reserva);
+        
+        if (!this.elementos.add(reservaCreada))
+        {
+            return false;
+        }
+
+        try
+        {
+            new ReservaRepository().insertRelacionPasajero(
+                    reservaCreada.getIdReserva(), pasajero.getIdPasajero()
+            );
+            
+            pasajero.addReserva(reservaCreada.getIdReserva());
+            
+            return true;
+        }
+        catch (RepositoryWriteException e)
+        {
+            this.delete(reservaCreada.getIdReserva());
+            
+            throw e;
+        }
+    }
+
+    public Set<Integer> obtenerPasajeros(Integer idReserva)
+    {
+        return new ReservaRepository().obtenerPasajeros(idReserva);
     }
 
     public Set<Reserva> obtenerReservasDelDia(LocalDate fecha)

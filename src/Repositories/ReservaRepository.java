@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import Enums.EstadoHabitacion;
@@ -77,6 +78,9 @@ public class ReservaRepository extends GenericRepository<Reserva> {
     @Override
     public Reserva insert(Reserva element) throws RepositoryWriteException {
 
+        validarFechas(element.getFechaCheckIn(), element.getFechaCheckOut());
+        validarDisponibilidad(element, null);
+
         String query = "INSERT INTO reserva " +
                 "(fecha_reserva, fecha_check_in, fecha_check_out) " +
                 "VALUES (?, ?, ?)";
@@ -137,6 +141,9 @@ public class ReservaRepository extends GenericRepository<Reserva> {
     @Override
     public void update(Reserva element) throws RepositoryWriteException {
 
+        validarFechas(element.getFechaCheckIn(), element.getFechaCheckOut());
+        validarDisponibilidad(element, element.getIdReserva());
+
         String query = "UPDATE reserva SET fecha_reserva = ?, " +
                 "fecha_check_in = ?, fecha_check_out = ? " +
                 "WHERE id_reserva = ?";
@@ -150,9 +157,56 @@ public class ReservaRepository extends GenericRepository<Reserva> {
                     element.getIdReserva()
             );
 
+            this.write("DELETE FROM reserva_habitacion WHERE id_reserva = ?",
+                    element.getIdReserva());
+
+            for (Habitacion habitacion : element.getHabitaciones())
+            {
+                insertRelacionHabitacion(element.getIdReserva(), habitacion.getIdHabitacion());
+            }
+
         } catch (RepositoryWriteException | SQLException e) {
             throw new RepositoryWriteException(
                     "Error al actualizar reserva: " + e.getMessage()
+            );
+        }
+    }
+
+    private void validarFechas(LocalDate checkIn, LocalDate checkOut)
+    {
+        if (checkIn == null || checkOut == null || !checkOut.isAfter(checkIn))
+        {
+            throw new RepositoryWriteException(
+                    "La fecha de check-out debe ser posterior al check-in"
+            );
+        }
+    }
+
+    private void validarDisponibilidad(Reserva reserva, Integer idReservaExcluir)
+    {
+        Set<Integer> idsHabitacion = reserva.getHabitaciones().stream()
+                .map(Habitacion::getIdHabitacion)
+                .collect(Collectors.toSet());
+
+        try
+        {
+            if (DisponibilidadRepository.habitacionesDisponibles(
+                    idsHabitacion,
+                    reserva.getFechaCheckIn(),
+                    reserva.getFechaCheckOut(),
+                    idReservaExcluir,
+                    null))
+            {
+                throw new RepositoryWriteException(
+                        "Una de las habitaciones no está disponible para esas fechas"
+                );
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RepositoryWriteException(
+                    "No se pudo verificar la disponibilidad de las habitaciones: "
+                            + e.getMessage()
             );
         }
     }
@@ -206,6 +260,32 @@ public class ReservaRepository extends GenericRepository<Reserva> {
         }
     }
 
+    public Set<Integer> obtenerPasajeros(Integer idReserva)
+        {
+            Set<Integer> pasajeros = new HashSet<>();
+            String query = "SELECT id_pasajero FROM pasajero_reserva WHERE id_reserva = ?";
+
+            try (Connection connection = DatabaseConnection.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(query))
+            {
+                statement.setInt(1, idReserva);
+                try (ResultSet rs = statement.executeQuery())
+                {
+                    while (rs.next())
+                    {
+                        pasajeros.add(rs.getInt("id_pasajero"));
+                    }
+                }
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeException(
+                        "Error al consultar los pasajeros de la reserva: " + e.getMessage(), e
+                );
+            }
+
+            return pasajeros;
+        }
 
     public void insertRelacionHabitacion(Integer idReserva, Integer idHabitacion)
             throws RepositoryWriteException {

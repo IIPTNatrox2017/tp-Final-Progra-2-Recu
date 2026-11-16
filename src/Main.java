@@ -12,6 +12,7 @@ import Enums.MenuKey;
 import Enums.UsuarioRol;
 import Exceptions.GetItemsInPageException;
 import Exceptions.MenuDoNotExistsException;
+import Exceptions.RepositoryWriteException;
 import Models.*;
 import Views.ScannerView;
 
@@ -114,7 +115,8 @@ void createMenus(MenuController menus)
                     "Modificar reservas",
                     "Borrar reservas",
                     "Listar reservas",
-                    "Listar reservas del día"
+                    "Listar reservas del día",
+                    "Crear ocupación desde reserva"
             )
     ));
     
@@ -260,7 +262,7 @@ void showMainMenu(MenuController menus, ScannerView input, Usuario usuario,
                 case 1 -> crudHabitaciones(menus, input, habitaciones);
                 case 2 -> crudPersonas(menus, input, personas);
                 case 3 -> crudPasajeros(menus, input, pasajeros, personas);
-                case 4 -> crudReservas(menus, input, reservas, habitaciones);
+                case 4 -> crudReservas(menus, input, reservas, habitaciones, ocupaciones, pasajeros);
                 case 5 -> crudOcupaciones(menus, input, ocupaciones, habitaciones, pasajeros);
             }
         }
@@ -270,7 +272,7 @@ void showMainMenu(MenuController menus, ScannerView input, Usuario usuario,
             {
                 case 0 -> crudPasajeros(menus, input, pasajeros, personas);
                 case 1 -> crudHabitaciones(menus, input, habitaciones);
-                case 2 -> crudReservas(menus, input, reservas, habitaciones);
+                case 2 -> crudReservas(menus, input, reservas, habitaciones, ocupaciones, pasajeros);
                 case 3 -> crudOcupaciones(menus, input, ocupaciones, habitaciones, pasajeros);
             }
         }
@@ -657,7 +659,8 @@ void crudPasajeros(MenuController menus, ScannerView input, PasajerosController 
 }
 
 void crudReservas(MenuController menus, ScannerView input, ReservasController controller,
-                         HabitacionesController habitaciones
+                         HabitacionesController habitaciones, OcupacionesController ocupaciones,
+                         PasajerosController pasajeros
 )
 {
     while (true)
@@ -687,9 +690,24 @@ void crudReservas(MenuController menus, ScannerView input, ReservasController co
                     continue;
                 }
                 
-                controller.add(new Reserva(IdConst.SIN_ID.getValue(), seleccionadas,
-                        LocalDate.now(), input.getLocalDate("Check-in"), input.getLocalDate("Check-out")
-                ));
+                try
+                {
+                        Pasajero pasajero = selectElement(menus, "Seleccione el pasajero",
+                                pasajeros.getAll());
+                        
+                        if (pasajero == null)
+                        {
+                            continue;
+                        }
+
+                        controller.addConPasajero(new Reserva(IdConst.SIN_ID.getValue(), seleccionadas,
+                                LocalDate.now(), input.getLocalDate("Check-in"), input.getLocalDate("Check-out")
+                        ), pasajero);
+                }
+                catch (RepositoryWriteException e)
+                {
+                    System.out.println(e.getMessage());
+                }
             }
             case 1 ->
             {
@@ -704,8 +722,35 @@ void crudReservas(MenuController menus, ScannerView input, ReservasController co
                         continue;
                     }
                     
+                    Set<Habitacion> habitacionesOriginales = r.getHabitaciones();
+                    LocalDate fechaCheckInOriginal = r.getFechaCheckIn();
+                    LocalDate fechaCheckOutOriginal = r.getFechaCheckOut();
+                    LocalDate fechaReservaOriginal = r.getFechaReserva();
+
                     editReservaAttribute(menus, input, r, habitaciones, attribute);
-                    controller.update(r);
+                    
+                    try
+                    {
+                        controller.update(r);
+                    }
+                    
+                    catch (RepositoryWriteException e)
+                    {
+                        for (Habitacion habitacion : r.getHabitaciones())
+                        {
+                            r.removeHabitacion(habitacion.getIdHabitacion());
+                        }
+                        
+                        for (Habitacion habitacion : habitacionesOriginales)
+                        {
+                            r.addHabitacion(habitacion);
+                        }
+                        
+                        r.setFechaCheckIn(fechaCheckInOriginal);
+                        r.setFechaCheckOut(fechaCheckOutOriginal);
+                        r.setFechaReserva(fechaReservaOriginal);
+                        System.out.println(e.getMessage());
+                    }
                 }
             }
             case 2 ->
@@ -717,7 +762,8 @@ void crudReservas(MenuController menus, ScannerView input, ReservasController co
                     controller.delete(r.getIdReserva());
                 }
             }
-            case 3 -> controller.getAll().forEach(System.out::println);
+            case 3 -> controller.getAll().stream().filter(r -> r.getFechaCheckIn().toEpochDay() >= LocalDate.now()
+                    .toEpochDay()).forEach(System.out::println);
             case 4 ->
             {
                 LocalDate fecha = input.getLocalDate("Fecha a consultar");
@@ -739,10 +785,65 @@ void crudReservas(MenuController menus, ScannerView input, ReservasController co
                     }
                 }
             }
+                case 5 ->
+                {
+                    Reserva reserva = selectElement(menus, "Seleccione una reserva",
+                            controller.getAll());
+                    
+                    if (reserva == null)
+                    {
+                        continue;
+                    }
+
+                    Set<Pasajero> pasajerosReserva = new HashSet<>();
+                    
+                    for (Integer idPasajero : controller.obtenerPasajeros(reserva.getIdReserva()))
+                    {
+                        Pasajero pasajero = pasajeros.get(idPasajero);
+                        
+                        if (pasajero != null)
+                        {
+                            pasajerosReserva.add(pasajero);
+                        }
+                    }
+
+                    if (pasajerosReserva.isEmpty())
+                    {
+                        System.out.println("La reserva no tiene pasajeros asociados.");
+                        continue;
+                    }
+
+                    Set<Ocupacion> ocupacionesCreadas = new HashSet<>();
+                    
+                    try
+                    {
+                        for (Habitacion habitacion : reserva.getHabitaciones())
+                        {
+                            Ocupacion ocupacionCreada = ocupaciones.addFromReserva(new Ocupacion(
+                                    IdConst.SIN_ID.getValue(),
+                                    habitacion,
+                                    new HashSet<>(pasajerosReserva),
+                                    reserva.getFechaCheckIn(),
+                                    reserva.getFechaCheckOut()
+                            ), reserva);
+                            
+                            ocupacionesCreadas.add(ocupacionCreada);
+                        }
+                        System.out.println("Ocupación creada para las habitaciones reservadas.");
+                    }
+                    catch (RepositoryWriteException e)
+                    {
+                        for (Ocupacion ocupacion : ocupacionesCreadas)
+                        {
+                            ocupaciones.delete(ocupacion.getIdOcupacion());
+                        }
+                        
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }
         }
     }
-}
-
 void crudOcupaciones(MenuController menus, ScannerView input, OcupacionesController controller,
                             HabitacionesController habitaciones, PasajerosController pasajeros
 )
@@ -773,9 +874,16 @@ void crudOcupaciones(MenuController menus, ScannerView input, OcupacionesControl
                     seleccionados.add(pasajero);
                 }
                 
-                controller.add(new Ocupacion(IdConst.SIN_ID.getValue(), habitacion, seleccionados,
-                        input.getLocalDate("Check-in"), input.getLocalDate("Check-out")
-                ));
+                try
+                {
+                    controller.add(new Ocupacion(IdConst.SIN_ID.getValue(), habitacion, seleccionados,
+                            input.getLocalDate("Check-in"), input.getLocalDate("Check-out")
+                    ));
+                }
+                catch (RepositoryWriteException e)
+                {
+                    System.out.println(e.getMessage());
+                }
             }
             case 1 ->
             {
@@ -790,8 +898,24 @@ void crudOcupaciones(MenuController menus, ScannerView input, OcupacionesControl
                         continue;
                     }
                     
+                    Habitacion habitacionOriginal = o.getHabitacion();
+                    LocalDate checkInOriginal = o.getCheckIn();
+                    LocalDate checkOutOriginal = o.getCheckOut();
+
                     editOcupacionAttribute(menus, input, o, habitaciones, pasajeros, attribute);
-                    controller.update(o);
+                    
+                    try
+                    {
+                        controller.update(o);
+                    }
+                    catch (RepositoryWriteException e)
+                    {
+                        o.setHabitacion(habitacionOriginal);
+                        o.setCheckIn(checkInOriginal);
+                        o.setCheckOut(checkOutOriginal);
+                        
+                        System.out.println(e.getMessage());
+                    }
                 }
             }
             case 2 ->
@@ -803,7 +927,8 @@ void crudOcupaciones(MenuController menus, ScannerView input, OcupacionesControl
                     controller.delete(o.getIdOcupacion());
                 }
             }
-            case 3 -> controller.getAll().forEach(System.out::println);
+            case 3 -> controller.getAll().stream().filter(o -> o.getCheckIn().toEpochDay() >= LocalDate.now()
+                    .toEpochDay()).forEach(System.out::println);
             case 4 ->
             {
                 LocalDate fecha = input.getLocalDate("Fecha a consultar");

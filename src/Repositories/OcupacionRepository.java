@@ -90,6 +90,20 @@ public class OcupacionRepository extends GenericRepository<Ocupacion>{
 
     @Override
     public Ocupacion insert(Ocupacion element) throws RepositoryWriteException {
+        return insert(element, null);
+    }
+
+    public Ocupacion insertFromReserva(Ocupacion element, Integer idReserva)
+            throws RepositoryWriteException
+    {
+        return insert(element, idReserva);
+    }
+
+    private Ocupacion insert(Ocupacion element, Integer idReservaExcluir)
+            throws RepositoryWriteException {
+
+        validarFechas(element.getCheckIn(), element.getCheckOut());
+        validarDisponibilidad(element, null, idReservaExcluir);
 
         String query = "INSERT INTO ocupacion " +
                 "(id_habitacion, check_in, check_out) " +
@@ -160,6 +174,9 @@ public class OcupacionRepository extends GenericRepository<Ocupacion>{
     @Override
     public void update(Ocupacion element) throws RepositoryWriteException {
 
+        validarFechas(element.getCheckIn(), element.getCheckOut());
+        validarDisponibilidad(element, element.getIdOcupacion(), null);
+
         String query = "UPDATE ocupacion SET id_habitacion = ?, " +
                 "check_in = ?, check_out = ? " +
                 "WHERE id_ocupacion = ?";
@@ -176,6 +193,47 @@ public class OcupacionRepository extends GenericRepository<Ocupacion>{
         } catch (RepositoryWriteException | SQLException e) {
             throw new RepositoryWriteException(
                     "Error al actualizar ocupación: " + e.getMessage()
+            );
+        }
+    }
+
+    private void validarFechas(LocalDate checkIn, LocalDate checkOut)
+    {
+        if (checkIn == null || checkOut == null || !checkOut.isAfter(checkIn))
+        {
+            throw new RepositoryWriteException(
+                    "La fecha de check-out debe ser posterior al check-in"
+            );
+        }
+    }
+
+    private void validarDisponibilidad(Ocupacion ocupacion, Integer idOcupacionExcluir,
+                                       Integer idReservaExcluir)
+    {
+        if (ocupacion.getHabitacion() == null)
+        {
+            throw new RepositoryWriteException("Debe seleccionar una habitación");
+        }
+
+        try
+        {
+            if (DisponibilidadRepository.habitacionesDisponibles(
+                    Set.of(ocupacion.getHabitacion().getIdHabitacion()),
+                    ocupacion.getCheckIn(),
+                    ocupacion.getCheckOut(),
+                    idReservaExcluir,
+                    idOcupacionExcluir))
+            {
+                throw new RepositoryWriteException(
+                        "La habitación no está disponible para esas fechas"
+                );
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RepositoryWriteException(
+                    "No se pudo verificar la disponibilidad de la habitación: "
+                            + e.getMessage()
             );
         }
     }
