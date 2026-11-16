@@ -1,9 +1,15 @@
 package Controllers;
 
 import Models.Persona;
+import Repositories.PersonaRepository;
 
 public class PersonasController extends GenericController<Persona>
 {
+    public PersonasController()
+    {
+        this.add(new PersonaRepository().selectAll());
+    }
+    
     @Override
     public Boolean exists(Integer id)
     {

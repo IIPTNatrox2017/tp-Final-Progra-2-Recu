@@ -16,26 +16,28 @@ public abstract class GenericRepository<T> implements ICrudRepository<T>
     
     protected int write(String query, Object... params) throws SQLException, RepositoryWriteException
     {
-        Connection connection = DatabaseConnection.getConnection();
-        PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
-        
-        for (int i = 0; i < params.length; i++)
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS))
         {
-            ps.setObject(i + 1, params[i]);
+            for (int i = 0; i < params.length; i++)
+            {
+                ps.setObject(i + 1, params[i]);
+            }
+
+            if (ps.executeUpdate() == 0)
+            {
+                throw new RepositoryWriteException("No se modificaron filas");
+            }
+
+            try (ResultSet rs = ps.getGeneratedKeys())
+            {
+                if (rs.next())
+                {
+                    return rs.getInt(1);
+                }
+
+                return 0;
+            }
         }
-        
-        if (ps.executeUpdate() == 0)
-        {
-            throw new RepositoryWriteException("No se modificaron filas");
-        }
-        
-        ResultSet rs = ps.getGeneratedKeys();
-        
-        if (rs.next())
-        {
-            return rs.getInt(1);
-        }
-        
-        return 0;
     }
 }

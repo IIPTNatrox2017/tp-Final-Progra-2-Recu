@@ -1,9 +1,15 @@
 package Controllers;
 
 import Models.Usuario;
+import Repositories.UsuarioRepository;
 
 public class UsuariosController extends GenericController<Usuario>
 {
+    public UsuariosController()
+    {
+        this.add(new UsuarioRepository().selectAll());
+    }
+    
     @Override
     public Boolean exists(Integer id)
     {
