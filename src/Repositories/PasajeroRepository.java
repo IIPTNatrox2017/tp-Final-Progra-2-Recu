@@ -137,17 +137,6 @@ public class PasajeroRepository extends GenericRepository<Pasajero> {
 
         try {
             this.write(query, element.getIdPasajero());
-
-            Persona persona = new Persona(
-                    element.getIdPersona(),
-                    element.getDni(),
-                    element.getNombre(),
-                    element.getOrigen(),
-                    element.getDomicilio()
-            ) {};
-
-            new PersonaRepository().delete(persona);
-
         } catch (RepositoryWriteException | SQLException e) {
             throw new RepositoryWriteException(
                     "Error al eliminar pasajero: " + e.getMessage()
