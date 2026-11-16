@@ -1,4 +1,3 @@
-
 package Repositories;
 
 import Database.DatabaseConnection;
@@ -18,15 +17,25 @@ import Enums.EstadoHabitacion;
 
 public class ReservaRepository extends GenericRepository<Reserva> {
 
-
     @Override
     protected Reserva create(ResultSet rs) throws SQLException {
 
         Integer idReserva = rs.getInt("id_reserva");
 
-        LocalDate fechaReserva = rs.getDate("fecha_reserva").toLocalDate();
-        LocalDate fechaCheckIn = rs.getDate("fecha_check_in").toLocalDate();
-        LocalDate fechaCheckOut = rs.getDate("fecha_check_out").toLocalDate();
+        Set<Habitacion> habitaciones = obtenerHabitaciones(idReserva);
+
+        return new Reserva(
+                idReserva,
+                habitaciones,
+                rs.getDate("fecha_reserva").toLocalDate(),
+                rs.getDate("fecha_check_in").toLocalDate(),
+                rs.getDate("fecha_check_out").toLocalDate()
+        );
+    }
+
+
+    private Set<Habitacion> obtenerHabitaciones(Integer idReserva)
+            throws SQLException {
 
         Set<Habitacion> habitaciones = new HashSet<>();
 
@@ -43,17 +52,17 @@ public class ReservaRepository extends GenericRepository<Reserva> {
 
             statement.setInt(1, idReserva);
 
-            try (ResultSet rsHabitaciones = statement.executeQuery()) {
+            try (ResultSet rs = statement.executeQuery()) {
 
-                while (rsHabitaciones.next()) {
+                while (rs.next()) {
 
                     Habitacion habitacion = new Habitacion(
-                            rsHabitaciones.getInt("id_habitacion"),
-                            rsHabitaciones.getString("habitacion"),
-                            rsHabitaciones.getInt("capacidad"),
-                            rsHabitaciones.getDouble("precio"),
+                            rs.getInt("id_habitacion"),
+                            rs.getString("habitacion"),
+                            rs.getInt("capacidad"),
+                            rs.getDouble("precio"),
                             EstadoHabitacion.valueOf(
-                                    rsHabitaciones.getString("estado_habitacion")
+                                    rs.getString("estado_habitacion")
                             )
                     );
 
@@ -62,16 +71,8 @@ public class ReservaRepository extends GenericRepository<Reserva> {
             }
         }
 
-        return new Reserva(
-                idReserva,
-                habitaciones,
-                fechaReserva,
-                fechaCheckIn,
-                fechaCheckOut
-        );
+        return habitaciones;
     }
-
-
 
     @Override
     public Reserva insert(Reserva element) throws RepositoryWriteException {
@@ -90,7 +91,7 @@ public class ReservaRepository extends GenericRepository<Reserva> {
 
             return new Reserva(
                     idReserva,
-                    new HashSet<>(element.getHabitaciones()),
+                    new HashSet<>(),
                     element.getFechaReserva(),
                     element.getFechaCheckIn(),
                     element.getFechaCheckOut()
@@ -121,13 +122,13 @@ public class ReservaRepository extends GenericRepository<Reserva> {
 
         } catch (SQLException e) {
             throw new RuntimeException(
-                    "Error al consultar las reservas: " + e.getMessage()
+                    "Error al consultar las reservas: " + e.getMessage(),
+                    e
             );
         }
 
         return reservas;
     }
-
 
 
     @Override
