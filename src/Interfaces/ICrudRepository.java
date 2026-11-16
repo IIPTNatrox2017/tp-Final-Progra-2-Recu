@@ -1,14 +1,16 @@
 package Interfaces;
+import Exceptions.RepositoryWriteException;
 
 import java.sql.SQLException;
+import java.util.Set;
 
 public interface ICrudRepository<T>
 {
-    void insert(T Element);
+    T insert(T Element) throws RepositoryWriteException;
+
+    Set<T> selectAll();
     
-    T select(int id);
+    void update(T Element) throws RepositoryWriteException;
     
-    void update(T Element);
-    
-    void delete(T Element);
+    void delete(T Element) throws RepositoryWriteException;
 }

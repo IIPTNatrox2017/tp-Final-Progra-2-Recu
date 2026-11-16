@@ -8,15 +8,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public abstract class GenericRepository<T> implements ICrudRepository<T>
 {
-    protected abstract T create(ResultSet rs);
+    protected abstract T create(ResultSet rs) throws SQLException;
     
     protected int write(String query, Object... params) throws SQLException, RepositoryWriteException
     {
         Connection connection = DatabaseConnection.getConnection();
-        PreparedStatement ps = connection.prepareStatement(query);
+        PreparedStatement ps = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
         
         for (int i = 0; i < params.length; i++)
         {
