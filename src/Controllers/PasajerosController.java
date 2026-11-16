@@ -6,8 +6,11 @@ import Repositories.PasajeroRepository;
 
 public class PasajerosController extends GenericController<Pasajero>
 {
-    public PasajerosController() throws RuntimeException
+    private final PersonasController personas;
+
+    public PasajerosController(PersonasController personas) throws RuntimeException
     {
+        this.personas = personas;
         this.add(new PasajeroRepository().selectAll());
     }
     
@@ -41,9 +44,14 @@ public class PasajerosController extends GenericController<Pasajero>
     }
     
     @Override
-    protected void addRepository(Pasajero element) throws RepositoryWriteException
+    protected Pasajero addRepository(Pasajero element) throws RepositoryWriteException
     {
-        new PasajeroRepository().insert(element);
+        if (this.personas.exists(element.getDni()))
+        {
+            throw new RepositoryWriteException("Ya existe una persona con el DNI ingresado");
+        }
+
+        return new PasajeroRepository().insert(element);
     }
     
     @Override

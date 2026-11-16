@@ -40,9 +40,9 @@ public class OcupacionesController extends GenericController<Ocupacion>
     }
     
     @Override
-    protected void addRepository(Ocupacion element) throws RepositoryWriteException
+    protected Ocupacion addRepository(Ocupacion element) throws RepositoryWriteException
     {
-        //new OcupacionRepository().insert(element);
+        return null;//new OcupacionRepository().insert(element);
     }
     
     @Override

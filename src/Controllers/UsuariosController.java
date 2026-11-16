@@ -6,8 +6,11 @@ import Repositories.UsuarioRepository;
 
 public class UsuariosController extends GenericController<Usuario>
 {
-    public UsuariosController() throws RuntimeException
+    private final PersonasController personas;
+
+    public UsuariosController(PersonasController personas) throws RuntimeException
     {
+        this.personas = personas;
         this.add(new UsuarioRepository().selectAll());
     }
     
@@ -41,9 +44,14 @@ public class UsuariosController extends GenericController<Usuario>
     }
     
     @Override
-    protected void addRepository(Usuario element) throws RepositoryWriteException
+    protected Usuario addRepository(Usuario element) throws RepositoryWriteException
     {
-        new UsuarioRepository().insert(element);
+        if (this.personas.exists(element.getDni()))
+        {
+            throw new RepositoryWriteException("Ya existe una persona con el DNI ingresado");
+        }
+
+        return new UsuarioRepository().insert(element);
     }
     
     @Override

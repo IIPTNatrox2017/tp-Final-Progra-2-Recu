@@ -40,9 +40,9 @@ public class ReservasController extends GenericController<Reserva>
     }
     
     @Override
-    protected void addRepository(Reserva element) throws RepositoryWriteException
+    protected Reserva addRepository(Reserva element) throws RepositoryWriteException
     {
-        //new ReservaRepository().insert(element);
+        return null;//new ReservaRepository().insert(element);
     }
     
     @Override

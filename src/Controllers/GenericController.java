@@ -10,7 +10,7 @@ public abstract class GenericController<T> implements ICrudController<T>
 {
     protected final Set<T> elementos = new HashSet<>();
     
-    protected abstract void addRepository(T element) throws RepositoryWriteException;
+    protected abstract T addRepository(T element) throws RepositoryWriteException;
     
     protected abstract void updateRepository(T element) throws RepositoryWriteException;
     
@@ -22,9 +22,9 @@ public abstract class GenericController<T> implements ICrudController<T>
             return false;
         }
         
-        this.elementos.add(elemento);
+        T elementoNuevo = this.addRepository(elemento);
         
-        this.addRepository(elemento);
+        this.elementos.add(elementoNuevo);
         
         return true;
     }
@@ -40,6 +40,11 @@ public abstract class GenericController<T> implements ICrudController<T>
         this.elementos.addAll(elementos);
         
         return true;
+    }
+
+    public Boolean addToElementos(T elemento)
+    {
+        return this.elementos.add(elemento);
     }
     
     @Override

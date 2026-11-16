@@ -51,9 +51,14 @@ public class PersonasController extends GenericController<Persona>
     }
     
     @Override
-    protected void addRepository(Persona element) throws RepositoryWriteException
+    protected Persona addRepository(Persona element) throws RepositoryWriteException
     {
-        new PersonaRepository().insert(element);
+        if (this.exists(element.getDni()))
+        {
+            throw new RepositoryWriteException("Ya existe una persona con el DNI ingresado");
+        }
+
+        return new PersonaRepository().insert(element);
     }
     
     @Override

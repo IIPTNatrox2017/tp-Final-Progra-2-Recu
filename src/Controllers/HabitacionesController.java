@@ -41,9 +41,9 @@ public class HabitacionesController extends GenericController<Habitacion>
     }
     
     @Override
-    protected void addRepository(Habitacion element) throws RepositoryWriteException
+    protected Habitacion addRepository(Habitacion element) throws RepositoryWriteException
     {
-        new HabitacionRepository().insert(element);
+        return new HabitacionRepository().insert(element);
     }
     
     @Override
