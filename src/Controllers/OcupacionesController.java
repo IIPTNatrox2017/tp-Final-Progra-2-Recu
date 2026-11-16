@@ -2,12 +2,13 @@ package Controllers;
 
 import Exceptions.RepositoryWriteException;
 import Models.Ocupacion;
+import Repositories.OcupacionRepository;
 
 public class OcupacionesController extends GenericController<Ocupacion>
 {
     public OcupacionesController() throws RuntimeException
     {
-        //this.add(new OcupacionRepository().selectAll());
+        this.add(new OcupacionRepository().selectAll());
     }
     
     @Override
@@ -32,7 +33,7 @@ public class OcupacionesController extends GenericController<Ocupacion>
             return false;
         }
         
-        //new OcupacionRepository().delete(ocupacion);
+        new OcupacionRepository().delete(ocupacion);
         
         this.elementos.remove(ocupacion);
         
@@ -42,12 +43,12 @@ public class OcupacionesController extends GenericController<Ocupacion>
     @Override
     protected Ocupacion addRepository(Ocupacion element) throws RepositoryWriteException
     {
-        return null;//new OcupacionRepository().insert(element);
+        return new OcupacionRepository().insert(element);
     }
     
     @Override
     protected void updateRepository(Ocupacion element) throws RepositoryWriteException
     {
-        //new OcupacionRepository().update(element);
+        new OcupacionRepository().update(element);
     }
 }

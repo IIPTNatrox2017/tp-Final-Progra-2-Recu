@@ -2,12 +2,13 @@ package Controllers;
 
 import Exceptions.RepositoryWriteException;
 import Models.Reserva;
+import Repositories.ReservaRepository;
 
 public class ReservasController extends GenericController<Reserva>
 {
     public ReservasController() throws RuntimeException
     {
-        //this.add(new ReservaRepository().selectAll());
+        this.add(new ReservaRepository().selectAll());
     }
     
     @Override
@@ -32,7 +33,7 @@ public class ReservasController extends GenericController<Reserva>
             return false;
         }
         
-        //new ReservaRepository().delete(reserva);
+        new ReservaRepository().delete(reserva);
         
         this.elementos.remove(reserva);
         
@@ -42,12 +43,12 @@ public class ReservasController extends GenericController<Reserva>
     @Override
     protected Reserva addRepository(Reserva element) throws RepositoryWriteException
     {
-        return null;//new ReservaRepository().insert(element);
+        return new ReservaRepository().insert(element);
     }
     
     @Override
     protected void updateRepository(Reserva element) throws RepositoryWriteException
     {
-        //new ReservaRepository().update(element);
+        new ReservaRepository().update(element);
     }
 }
