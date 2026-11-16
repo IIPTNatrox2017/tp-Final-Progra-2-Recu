@@ -14,7 +14,10 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
+import Enums.EstadoHabitacion;
+
 public class ReservaRepository extends GenericRepository<Reserva> {
+
 
     @Override
     protected Reserva create(ResultSet rs) throws SQLException {
@@ -27,6 +30,38 @@ public class ReservaRepository extends GenericRepository<Reserva> {
 
         Set<Habitacion> habitaciones = new HashSet<>();
 
+        String query = """
+            SELECT h.*
+            FROM habitacion h
+            JOIN reserva_habitacion rh
+                ON h.id_habitacion = rh.id_habitacion
+            WHERE rh.id_reserva = ?
+            """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, idReserva);
+
+            try (ResultSet rsHabitaciones = statement.executeQuery()) {
+
+                while (rsHabitaciones.next()) {
+
+                    Habitacion habitacion = new Habitacion(
+                            rsHabitaciones.getInt("id_habitacion"),
+                            rsHabitaciones.getString("habitacion"),
+                            rsHabitaciones.getInt("capacidad"),
+                            rsHabitaciones.getDouble("precio"),
+                            EstadoHabitacion.valueOf(
+                                    rsHabitaciones.getString("estado_habitacion")
+                            )
+                    );
+
+                    habitaciones.add(habitacion);
+                }
+            }
+        }
+
         return new Reserva(
                 idReserva,
                 habitaciones,
@@ -35,6 +70,7 @@ public class ReservaRepository extends GenericRepository<Reserva> {
                 fechaCheckOut
         );
     }
+
 
 
     @Override
@@ -68,7 +104,6 @@ public class ReservaRepository extends GenericRepository<Reserva> {
     }
 
 
-
     @Override
     public Set<Reserva> selectAll() throws RuntimeException {
 
@@ -92,6 +127,8 @@ public class ReservaRepository extends GenericRepository<Reserva> {
 
         return reservas;
     }
+
+
 
     @Override
     public void update(Reserva element) throws RepositoryWriteException {
