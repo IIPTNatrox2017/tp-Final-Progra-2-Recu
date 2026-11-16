@@ -89,13 +89,16 @@ public class ReservaRepository extends GenericRepository<Reserva> {
                     element.getFechaCheckOut()
             );
 
+            for (Habitacion habitacion : element.getHabitaciones()) {
+                insertRelacionHabitacion(idReserva, habitacion.getIdHabitacion());
+            }
+
             return new Reserva(
                     idReserva,
-                    new HashSet<>(),
+                    element.getHabitaciones(),
                     element.getFechaReserva(),
                     element.getFechaCheckIn(),
-                    element.getFechaCheckOut()
-            );
+                    element.getFechaCheckOut());
 
         } catch (RepositoryWriteException | SQLException e) {
             throw new RepositoryWriteException(

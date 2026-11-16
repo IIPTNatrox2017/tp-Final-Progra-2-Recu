@@ -95,8 +95,28 @@ void createMenus(MenuController menus)
     addCrudMenu(menus, MenuKey.HABITACIONES, "Habitaciones");
     addCrudMenu(menus, MenuKey.PERSONAS, "Personas");
     addCrudMenu(menus, MenuKey.PASAJEROS, "Pasajeros");
-    addCrudMenu(menus, MenuKey.RESERVAS, "Reservas");
-    addCrudMenu(menus, MenuKey.OCUPACIONES, "Ocupaciones");
+
+    menus.addMenu(MenuKey.OCUPACIONES.getValue(), new Menu(
+            "Ocupaciones",
+            items(
+                    "Crear ocupaciones",
+                    "Modificar ocupaciones",
+                    "Borrar ocupaciones",
+                    "Listar ocupaciones",
+                    "Listar ocupaciones del día"
+            )
+    ));
+
+    menus.addMenu(MenuKey.RESERVAS.getValue(), new Menu(
+            "Reservas",
+            items(
+                    "Crear reservas",
+                    "Modificar reservas",
+                    "Borrar reservas",
+                    "Listar reservas",
+                    "Listar reservas del día"
+            )
+    ));
     
     menus.addMenu(MenuKey.EDIT_USUARIO.getValue(), new Menu("Atributo del usuario",
                     items("DNI", "Nombre", "Origen", "Domicilio", "Usuario", "Contraseña")
@@ -661,6 +681,10 @@ void crudReservas(MenuController menus, ScannerView input, ReservasController co
                 if (habitacion != null)
                 {
                     seleccionadas.add(habitacion);
+                }else
+                {
+                    System.out.println("No se seleccionó ninguna habitación.");
+                    continue;
                 }
                 
                 controller.add(new Reserva(IdConst.SIN_ID.getValue(), seleccionadas,
@@ -694,6 +718,27 @@ void crudReservas(MenuController menus, ScannerView input, ReservasController co
                 }
             }
             case 3 -> controller.getAll().forEach(System.out::println);
+            case 4 ->
+            {
+                LocalDate fecha = input.getLocalDate("Fecha a consultar");
+
+                Set<Reserva> reservasDelDia = controller.obtenerReservasDelDia(fecha);
+
+                if (reservasDelDia.isEmpty())
+                {
+                    System.out.println("No hay reservas para esa fecha.");
+                }
+                else
+                {
+                    for (Reserva reserva : reservasDelDia)
+                    {
+                        System.out.println("Reserva ID: " + reserva.getIdReserva());
+                        System.out.println("Check-in: " + reserva.getFechaCheckIn());
+                        System.out.println("Check-out: " + reserva.getFechaCheckOut());
+                        System.out.println("--------------------");
+                    }
+                }
+            }
         }
     }
 }
@@ -759,6 +804,28 @@ void crudOcupaciones(MenuController menus, ScannerView input, OcupacionesControl
                 }
             }
             case 3 -> controller.getAll().forEach(System.out::println);
+            case 4 ->
+            {
+                LocalDate fecha = input.getLocalDate("Fecha a consultar");
+
+                Set<Ocupacion> ocupacionesDelDia = controller.obtenerOcupacionesDelDia(fecha);
+
+                if (ocupacionesDelDia.isEmpty())
+                {
+                    System.out.println("No hay ocupaciones para esa fecha.");
+                }
+                else
+                {
+                    for (Ocupacion ocupacion : ocupacionesDelDia)
+                    {
+                        System.out.println("Ocupación ID: " + ocupacion.getIdOcupacion());
+                        System.out.println("Check-in: " + ocupacion.getCheckIn());
+                        System.out.println("Check-out: " + ocupacion.getCheckOut());
+                        System.out.println("--------------------");
+                    }
+                }
+            }
+
         }
     }
 }

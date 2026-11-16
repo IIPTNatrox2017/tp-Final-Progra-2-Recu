@@ -89,22 +89,26 @@ public class Reserva
     {
         return (int) (this.fechaCheckOut.toEpochDay() - this.fechaCheckIn.toEpochDay());
     }
-    
+
     public String getHabitacionesString()
     {
         StringBuilder sb = new StringBuilder();
-        
-        for(Habitacion habitacion : this.habitaciones)
+
+        for (Habitacion habitacion : this.habitaciones)
         {
             sb.append(habitacion.getHabitacion())
                     .append(", ");
         }
-        
-        sb.setLength(sb.length() - 2);
-        
+
+        if (sb.length() > 0)
+        {
+            sb.setLength(sb.length() - 2);
+        }
+
         return sb.toString();
     }
-    
+
+
     @Override
     public boolean equals(Object o)
     {

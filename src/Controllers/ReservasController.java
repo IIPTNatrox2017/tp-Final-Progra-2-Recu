@@ -3,6 +3,8 @@ package Controllers;
 import Exceptions.RepositoryWriteException;
 import Models.Reserva;
 import Repositories.ReservaRepository;
+import java.time.LocalDate;
+import java.util.Set;
 
 public class ReservasController extends GenericController<Reserva>
 {
@@ -50,5 +52,10 @@ public class ReservasController extends GenericController<Reserva>
     protected void updateRepository(Reserva element) throws RepositoryWriteException
     {
         new ReservaRepository().update(element);
+    }
+
+    public Set<Reserva> obtenerReservasDelDia(LocalDate fecha)
+    {
+        return new ReservaRepository().obtenerReservasDelDia(fecha);
     }
 }

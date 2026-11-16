@@ -89,19 +89,22 @@ public class Ocupacion
     {
         return this.habitacion.getHabitacion();
     }
-    
+
     public String getPasajerosNombre()
     {
         StringBuilder sb = new StringBuilder();
-        
-        for(Pasajero pasajero : this.pasajeros)
+
+        for (Pasajero pasajero : this.pasajeros)
         {
             sb.append(pasajero.getNombre())
                     .append(", ");
         }
-        
-        sb.setLength(sb.length() - 2);
-        
+
+        if (sb.length() > 0)
+        {
+            sb.setLength(sb.length() - 2);
+        }
+
         return sb.toString();
     }
     

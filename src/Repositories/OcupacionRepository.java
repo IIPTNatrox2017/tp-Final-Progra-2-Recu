@@ -103,10 +103,14 @@ public class OcupacionRepository extends GenericRepository<Ocupacion>{
                     element.getCheckOut()
             );
 
+            for (Pasajero pasajero : element.getPasajeros()) {
+                insertRelacionPasajero(idOcupacion, pasajero.getIdPasajero());
+            }
+
             return new Ocupacion(
                     idOcupacion,
                     element.getHabitacion(),
-                    new HashSet<>(),
+                    new HashSet<>(element.getPasajeros()),
                     element.getCheckIn(),
                     element.getCheckOut()
             );
