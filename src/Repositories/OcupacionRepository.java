@@ -226,4 +226,42 @@ public class OcupacionRepository extends GenericRepository<Ocupacion>{
         }
     }
 
+
+    public Set<Ocupacion> obtenerOcupacionesDelDia(LocalDate fecha) {
+
+        Set<Ocupacion> ocupaciones = new HashSet<>();
+
+        String query = """
+            SELECT o.id_ocupacion, o.id_habitacion,
+                   o.check_in, o.check_out,
+                   h.habitacion, h.capacidad, h.precio,
+                   h.estado_habitacion
+            FROM ocupacion o
+            JOIN habitacion h ON h.id_habitacion = o.id_habitacion
+            WHERE o.check_in <= ?
+              AND o.check_out > ?
+            """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setDate(1, java.sql.Date.valueOf(fecha));
+            statement.setDate(2, java.sql.Date.valueOf(fecha));
+
+            try (ResultSet rs = statement.executeQuery()) {
+
+                while (rs.next()) {
+                    ocupaciones.add(create(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Error al consultar las ocupaciones del día: " + e.getMessage(), e
+            );
+        }
+
+        return ocupaciones;
+    }
+
 }

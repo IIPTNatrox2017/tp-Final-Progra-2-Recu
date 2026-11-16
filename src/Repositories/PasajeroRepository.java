@@ -26,8 +26,8 @@ public class PasajeroRepository extends GenericRepository<Pasajero> {
         String domicilio = rs.getString("domicilio");
         Integer idPasajero = rs.getInt("id_pasajero");
 
-        Set<Integer> reservas = new HashSet<>();
-        Set<Integer> ocupaciones = new HashSet<>();
+        Set<Integer> reservas = obtenerReservas(idPasajero);
+        Set<Integer> ocupaciones = obtenerOcupaciones(idPasajero);
 
         return new Pasajero(
                 idPersona,
@@ -143,4 +143,214 @@ public class PasajeroRepository extends GenericRepository<Pasajero> {
             );
         }
     }
+
+
+    private Set<Integer> obtenerReservas(Integer idPasajero)
+            throws SQLException {
+
+        Set<Integer> reservas = new HashSet<>();
+
+        String query = """
+            SELECT id_reserva
+            FROM pasajero_reserva
+            WHERE id_pasajero = ?
+            """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, idPasajero);
+
+            try (ResultSet rs = statement.executeQuery()) {
+
+                while (rs.next()) {
+                    reservas.add(rs.getInt("id_reserva"));
+                }
+            }
+        }
+
+        return reservas;
+    }
+
+
+    private Set<Integer> obtenerOcupaciones(Integer idPasajero)
+            throws SQLException {
+
+        Set<Integer> ocupaciones = new HashSet<>();
+
+        String query = """
+            SELECT id_ocupacion
+            FROM ocupacion_pasajero
+            WHERE id_pasajero = ?
+            """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, idPasajero);
+
+            try (ResultSet rs = statement.executeQuery()) {
+
+                while (rs.next()) {
+                    ocupaciones.add(rs.getInt("id_ocupacion"));
+                }
+            }
+        }
+
+        return ocupaciones;
+    }
+
+
+    public Set<Integer> obtenerReservasAntiguas(Integer idPasajero) {
+
+        Set<Integer> reservas = new HashSet<>();
+
+        String query = """
+            SELECT r.id_reserva
+            FROM reserva r
+            JOIN pasajero_reserva pr
+                ON r.id_reserva = pr.id_reserva
+            WHERE pr.id_pasajero = ?
+              AND r.fecha_check_out <= ?
+            """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, idPasajero);
+            statement.setDate(2, java.sql.Date.valueOf(java.time.LocalDate.now()));
+
+            try (ResultSet rs = statement.executeQuery()) {
+
+                while (rs.next()) {
+                    reservas.add(rs.getInt("id_reserva"));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Error al consultar reservas antiguas: " + e.getMessage(), e
+            );
+        }
+
+        return reservas;
+    }
+
+
+    public Set<Integer> obtenerReservasActuales(Integer idPasajero) {
+
+        Set<Integer> reservas = new HashSet<>();
+
+        String query = """
+            SELECT r.id_reserva
+            FROM reserva r
+            JOIN pasajero_reserva pr
+                ON r.id_reserva = pr.id_reserva
+            WHERE pr.id_pasajero = ?
+              AND r.fecha_check_in <= ?
+              AND r.fecha_check_out > ?
+            """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            java.sql.Date hoy = java.sql.Date.valueOf(java.time.LocalDate.now());
+
+            statement.setInt(1, idPasajero);
+            statement.setDate(2, hoy);
+            statement.setDate(3, hoy);
+
+            try (ResultSet rs = statement.executeQuery()) {
+
+                while (rs.next()) {
+                    reservas.add(rs.getInt("id_reserva"));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Error al consultar reservas actuales: " + e.getMessage(), e
+            );
+        }
+
+        return reservas;
+    }
+
+
+    public Set<Integer> obtenerOcupacionesAntiguas(Integer idPasajero) {
+
+        Set<Integer> ocupaciones = new HashSet<>();
+
+        String query = """
+            SELECT o.id_ocupacion
+            FROM ocupacion o
+            JOIN ocupacion_pasajero op
+                ON o.id_ocupacion = op.id_ocupacion
+            WHERE op.id_pasajero = ?
+              AND o.check_out <= ?
+            """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setInt(1, idPasajero);
+            statement.setDate(2, java.sql.Date.valueOf(java.time.LocalDate.now()));
+
+            try (ResultSet rs = statement.executeQuery()) {
+
+                while (rs.next()) {
+                    ocupaciones.add(rs.getInt("id_ocupacion"));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Error al consultar ocupaciones antiguas: " + e.getMessage(), e
+            );
+        }
+
+        return ocupaciones;
+    }
+
+
+    public Set<Integer> obtenerOcupacionesActuales(Integer idPasajero) {
+
+        Set<Integer> ocupaciones = new HashSet<>();
+
+        String query = """
+            SELECT o.id_ocupacion
+            FROM ocupacion o
+            JOIN ocupacion_pasajero op
+                ON o.id_ocupacion = op.id_ocupacion
+            WHERE op.id_pasajero = ?
+              AND o.check_in <= ?
+              AND o.check_out > ?
+            """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            java.sql.Date hoy = java.sql.Date.valueOf(java.time.LocalDate.now());
+
+            statement.setInt(1, idPasajero);
+            statement.setDate(2, hoy);
+            statement.setDate(3, hoy);
+
+            try (ResultSet rs = statement.executeQuery()) {
+
+                while (rs.next()) {
+                    ocupaciones.add(rs.getInt("id_ocupacion"));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Error al consultar ocupaciones actuales: " + e.getMessage(), e
+            );
+        }
+
+        return ocupaciones;
+    }
+
+
 }

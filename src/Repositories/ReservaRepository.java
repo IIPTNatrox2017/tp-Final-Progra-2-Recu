@@ -237,4 +237,38 @@ public class ReservaRepository extends GenericRepository<Reserva> {
         }
     }
 
+
+    public Set<Reserva> obtenerReservasDelDia(LocalDate fecha) {
+
+        Set<Reserva> reservas = new HashSet<>();
+
+        String query = """
+            SELECT *
+            FROM reserva
+            WHERE fecha_check_in <= ?
+              AND fecha_check_out > ?
+            """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+
+            statement.setDate(1, java.sql.Date.valueOf(fecha));
+            statement.setDate(2, java.sql.Date.valueOf(fecha));
+
+            try (ResultSet rs = statement.executeQuery()) {
+
+                while (rs.next()) {
+                    reservas.add(create(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(
+                    "Error al consultar las reservas del día: " + e.getMessage(), e
+            );
+        }
+
+        return reservas;
+    }
+
 }
