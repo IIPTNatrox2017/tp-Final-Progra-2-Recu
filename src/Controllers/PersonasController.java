@@ -1,11 +1,12 @@
 package Controllers;
 
+import Exceptions.RepositoryWriteException;
 import Models.Persona;
 import Repositories.PersonaRepository;
 
 public class PersonasController extends GenericController<Persona>
 {
-    public PersonasController()
+    public PersonasController() throws RuntimeException
     {
         this.add(new PersonaRepository().selectAll());
     }
@@ -35,6 +36,29 @@ public class PersonasController extends GenericController<Persona>
     @Override
     public Boolean delete(Integer id)
     {
-        return this.elementos.removeIf(p -> p.getIdPersona().equals(id));
+        Persona persona = this.get(id);
+        
+        if(persona == null)
+        {
+            return false;
+        }
+        
+        new PersonaRepository().delete(persona);
+        
+        this.elementos.remove(persona);
+        
+        return true;
+    }
+    
+    @Override
+    protected void addRepository(Persona element) throws RepositoryWriteException
+    {
+        new PersonaRepository().insert(element);
+    }
+    
+    @Override
+    protected void updateRepository(Persona element) throws RepositoryWriteException
+    {
+        new PersonaRepository().update(element);
     }
 }

@@ -1,9 +1,16 @@
 package Controllers;
 
+import Exceptions.RepositoryWriteException;
 import Models.Pasajero;
+import Repositories.PasajeroRepository;
 
 public class PasajerosController extends GenericController<Pasajero>
 {
+    public PasajerosController() throws RuntimeException
+    {
+        this.add(new PasajeroRepository().selectAll());
+    }
+    
     @Override
     public Boolean exists(Integer id)
     {
@@ -19,6 +26,29 @@ public class PasajerosController extends GenericController<Pasajero>
     @Override
     public Boolean delete(Integer id)
     {
-        return this.elementos.removeIf(p -> p.getIdPasajero().equals(id));
+        Pasajero pasajero = this.get(id);
+        
+        if(pasajero == null)
+        {
+            return false;
+        }
+        
+        new PasajeroRepository().delete(pasajero);
+        
+        this.elementos.remove(pasajero);
+        
+        return true;
+    }
+    
+    @Override
+    protected void addRepository(Pasajero element) throws RepositoryWriteException
+    {
+        new PasajeroRepository().insert(element);
+    }
+    
+    @Override
+    protected void updateRepository(Pasajero element) throws RepositoryWriteException
+    {
+        new PasajeroRepository().update(element);
     }
 }

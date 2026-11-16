@@ -1,9 +1,15 @@
 package Controllers;
 
+import Exceptions.RepositoryWriteException;
 import Models.Reserva;
 
 public class ReservasController extends GenericController<Reserva>
 {
+    public ReservasController() throws RuntimeException
+    {
+        //this.add(new ReservaRepository().selectAll());
+    }
+    
     @Override
     public Boolean exists(Integer id)
     {
@@ -19,6 +25,29 @@ public class ReservasController extends GenericController<Reserva>
     @Override
     public Boolean delete(Integer id)
     {
-        return this.elementos.removeIf(p -> p.getIdReserva().equals(id));
+        Reserva reserva = this.get(id);
+        
+        if(reserva == null)
+        {
+            return false;
+        }
+        
+        //new ReservaRepository().delete(reserva);
+        
+        this.elementos.remove(reserva);
+        
+        return true;
+    }
+    
+    @Override
+    protected void addRepository(Reserva element) throws RepositoryWriteException
+    {
+        //new ReservaRepository().insert(element);
+    }
+    
+    @Override
+    protected void updateRepository(Reserva element) throws RepositoryWriteException
+    {
+        //new ReservaRepository().update(element);
     }
 }

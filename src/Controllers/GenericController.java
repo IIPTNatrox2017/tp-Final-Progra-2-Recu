@@ -1,5 +1,6 @@
 package Controllers;
 
+import Exceptions.RepositoryWriteException;
 import Interfaces.ICrudController;
 
 import java.util.HashSet;
@@ -9,15 +10,21 @@ public abstract class GenericController<T> implements ICrudController<T>
 {
     protected final Set<T> elementos = new HashSet<>();
     
+    protected abstract void addRepository(T element) throws RepositoryWriteException;
+    
+    protected abstract void updateRepository(T element) throws RepositoryWriteException;
+    
     @Override
-    public Boolean add(T elemento)
+    public Boolean add(T elemento) throws RepositoryWriteException
     {
-        if(this.elementos.contains(elemento))
+        if (this.elementos.contains(elemento))
         {
             return false;
         }
         
         this.elementos.add(elemento);
+        
+        this.addRepository(elemento);
         
         return true;
     }
@@ -25,7 +32,7 @@ public abstract class GenericController<T> implements ICrudController<T>
     @Override
     public Boolean add(Set<T> elementos)
     {
-        if(this.elementos.containsAll(elementos))
+        if (this.elementos.containsAll(elementos))
         {
             return false;
         }
@@ -42,16 +49,14 @@ public abstract class GenericController<T> implements ICrudController<T>
     }
     
     @Override
-    public Boolean update(T elemento)
+    public Boolean update(T elemento) throws RepositoryWriteException
     {
-        if(this.elementos.contains(elemento) == false)
+        if (this.elementos.contains(elemento) == false)
         {
             return false;
         }
         
-        this.elementos.remove(elemento);
-        
-        this.elementos.add(elemento);
+        this.updateRepository(elemento);
         
         return true;
     }

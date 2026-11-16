@@ -1,9 +1,15 @@
 package Controllers;
 
+import Exceptions.RepositoryWriteException;
 import Models.Ocupacion;
 
 public class OcupacionesController extends GenericController<Ocupacion>
 {
+    public OcupacionesController() throws RuntimeException
+    {
+        //this.add(new OcupacionRepository().selectAll());
+    }
+    
     @Override
     public Boolean exists(Integer id)
     {
@@ -19,6 +25,29 @@ public class OcupacionesController extends GenericController<Ocupacion>
     @Override
     public Boolean delete(Integer id)
     {
-        return this.elementos.removeIf(o -> o.getIdOcupacion().equals(id));
+        Ocupacion ocupacion = this.get(id);
+        
+        if(ocupacion == null)
+        {
+            return false;
+        }
+        
+        //new OcupacionRepository().delete(ocupacion);
+        
+        this.elementos.remove(ocupacion);
+        
+        return true;
+    }
+    
+    @Override
+    protected void addRepository(Ocupacion element) throws RepositoryWriteException
+    {
+        //new OcupacionRepository().insert(element);
+    }
+    
+    @Override
+    protected void updateRepository(Ocupacion element) throws RepositoryWriteException
+    {
+        //new OcupacionRepository().update(element);
     }
 }
