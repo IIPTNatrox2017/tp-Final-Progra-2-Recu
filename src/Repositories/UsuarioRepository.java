@@ -84,7 +84,7 @@ public class UsuarioRepository extends GenericRepository<Usuario>
     }
     
     @Override
-    public Set<Usuario> selectAll()
+    public Set<Usuario> selectAll() throws RuntimeException
     {
         Set<Usuario> usuarios = new HashSet<>();
         

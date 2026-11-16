@@ -60,7 +60,7 @@ public class HabitacionRepository extends GenericRepository<Habitacion> {
     }
 
     @Override
-    public Set<Habitacion> selectAll() {
+    public Set<Habitacion> selectAll() throws RuntimeException {
 
         Set<Habitacion> habitaciones = new HashSet<>();
 

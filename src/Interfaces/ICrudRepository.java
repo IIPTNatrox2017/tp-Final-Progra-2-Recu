@@ -8,7 +8,7 @@ public interface ICrudRepository<T>
 {
     T insert(T Element) throws RepositoryWriteException;
 
-    Set<T> selectAll();
+    Set<T> selectAll() throws RuntimeException;
     
     void update(T Element) throws RepositoryWriteException;
     

@@ -83,7 +83,7 @@ public class PasajeroRepository extends GenericRepository<Pasajero> {
     }
 
     @Override
-    public Set<Pasajero> selectAll() {
+    public Set<Pasajero> selectAll() throws RuntimeException{
         Set<Pasajero> pasajeros = new HashSet<>();
 
         String query = """
