@@ -1,8 +1,11 @@
+
 package Repositories;
 
 import Database.DatabaseConnection;
+import Enums.IdConst;
 import Exceptions.RepositoryWriteException;
 import Models.Pasajero;
+import Models.Persona;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,18 +14,17 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class PasajeroRepository extends GenericRepository<Pasajero>{
+public class PasajeroRepository extends GenericRepository<Pasajero> {
 
     @Override
-    protected Pasajero create(ResultSet rs) throws SQLException {
-
+    protected Pasajero create(ResultSet rs) throws SQLException
+    {
         Integer idPersona = rs.getInt("id_persona");
         String dni = rs.getString("dni");
         String nombre = rs.getString("nombre");
         String origen = rs.getString("origen");
         String domicilio = rs.getString("domicilio");
         Integer idPasajero = rs.getInt("id_pasajero");
-
 
         Set<Integer> reservas = new HashSet<>();
         Set<Integer> ocupaciones = new HashSet<>();
@@ -40,69 +42,68 @@ public class PasajeroRepository extends GenericRepository<Pasajero>{
     }
 
     @Override
-    public Pasajero insert(Pasajero pasajero) throws RepositoryWriteException {
-        String queryPersona = "INSERT INTO persona" +
-                "(dni, nombre, origen, domicilio) " +
-                "VALUES (?, ?, ?, ?)";
+    public Pasajero insert(Pasajero element) throws RepositoryWriteException {
+        String query = "INSERT INTO pasajero (id_persona) VALUES (?)";
 
-        String queryPasajero = "INSERT INTO pasajero " +
-                "(id_persona) VALUES (?)";
+        try {
+            int idPersona = element.getIdPersona();
 
+            if (idPersona == IdConst.SIN_ID.getValue()) {
+                Persona persona = new Persona(
+                        IdConst.SIN_ID.getValue(),
+                        element.getDni(),
+                        element.getNombre(),
+                        element.getOrigen(),
+                        element.getDomicilio()
+                ) {};
 
-        try{
-            int idPersona = write(
-                    queryPersona,
-                    pasajero.getDni(),
-                    pasajero.getNombre(),
-                    pasajero.getOrigen(),
-                    pasajero.getDomicilio()
-            );
+                idPersona = new PersonaRepository()
+                        .insert(persona)
+                        .getIdPersona();
+            }
 
-            int idPasajero = write(queryPasajero, idPersona);
+            int idPasajero = this.write(query, idPersona);
 
             return new Pasajero(
                     idPersona,
-                    pasajero.getDni(),
-                    pasajero.getNombre(),
-                    pasajero.getOrigen(),
-                    pasajero.getDomicilio(),
+                    element.getDni(),
+                    element.getNombre(),
+                    element.getOrigen(),
+                    element.getDomicilio(),
                     idPasajero,
-                    pasajero.getReservas(),
-                    pasajero.getOcupaciones()
+                    element.getReservas(),
+                    element.getOcupaciones()
             );
-        }catch (SQLException e) {
+
+        } catch (RepositoryWriteException | SQLException e) {
             throw new RepositoryWriteException(
                     "Error al insertar pasajero: " + e.getMessage()
-            );
-        }catch (RepositoryWriteException e) {
-            throw new RuntimeException(
-                    "Error de escritura al insertar pasajero: " + e.getMessage()
             );
         }
     }
 
     @Override
     public Set<Pasajero> selectAll() {
-
         Set<Pasajero> pasajeros = new HashSet<>();
 
-        String query = "SELECT p.id_persona, p.dni, p.nombre, " +
-                "p.origen, p.domicilio, pa.id_pasajero " +
-                "FROM pasajero pa " +
-                "INNER JOIN persona p ON pa.id_persona = p.id_persona";
+        String query = """
+                SELECT pa.id_pasajero, p.id_persona, p.dni,
+                       p.nombre, p.origen, p.domicilio
+                FROM pasajero pa
+                JOIN persona p ON p.id_persona = pa.id_persona
+                """;
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(query);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query);
+             ResultSet rs = statement.executeQuery()) {
 
             while (rs.next()) {
-                Pasajero pasajero = create(rs);
-                pasajeros.add(pasajero);
+                pasajeros.add(create(rs));
             }
 
         } catch (SQLException e) {
             throw new RuntimeException(
-                    "Error al consultar los pasajeros: " + e.getMessage(), e
+                    "Error al consultar los pasajeros: " + e.getMessage()
             );
         }
 
@@ -110,54 +111,46 @@ public class PasajeroRepository extends GenericRepository<Pasajero>{
     }
 
     @Override
-    public void update(Pasajero pasajero) throws RepositoryWriteException {
-
-        String query = "UPDATE persona " +
-                "SET dni = ?, nombre = ?, origen = ?, domicilio = ? " +
-                "WHERE id_persona = ?";
-
+    public void update(Pasajero element) throws RepositoryWriteException
+    {
         try {
-            write(
-                    query,
-                    pasajero.getDni(),
-                    pasajero.getNombre(),
-                    pasajero.getOrigen(),
-                    pasajero.getDomicilio(),
-                    pasajero.getIdPersona()
-            );
+            Persona persona = new Persona(
+                    element.getIdPersona(),
+                    element.getDni(),
+                    element.getNombre(),
+                    element.getOrigen(),
+                    element.getDomicilio()
+            ) {};
 
-        } catch (SQLException e) {
+            new PersonaRepository().update(persona);
+
+        } catch (RepositoryWriteException e) {
             throw new RepositoryWriteException(
                     "Error al actualizar pasajero: " + e.getMessage()
-            );
-        }catch (RepositoryWriteException e) {
-            throw new RuntimeException(
-                    "Error de escritura al insertar pasajero: " + e.getMessage()
             );
         }
     }
 
     @Override
-    public void delete(Pasajero pasajero) throws RepositoryWriteException {
-
-        String queryPasajero = "DELETE FROM pasajero " +
-                "WHERE id_pasajero = ?";
-
-        String queryPersona = "DELETE FROM persona " +
-                "WHERE id_persona = ?";
+    public void delete(Pasajero element) throws RepositoryWriteException {
+        String query = "DELETE FROM pasajero WHERE id_pasajero = ?";
 
         try {
-            write(queryPasajero, pasajero.getIdPasajero());
+            this.write(query, element.getIdPasajero());
 
-            write(queryPersona, pasajero.getIdPersona());
+            Persona persona = new Persona(
+                    element.getIdPersona(),
+                    element.getDni(),
+                    element.getNombre(),
+                    element.getOrigen(),
+                    element.getDomicilio()
+            ) {};
 
-        } catch (SQLException e) {
+            new PersonaRepository().delete(persona);
+
+        } catch (RepositoryWriteException | SQLException e) {
             throw new RepositoryWriteException(
                     "Error al eliminar pasajero: " + e.getMessage()
-            );
-        }catch (RepositoryWriteException e) {
-            throw new RuntimeException(
-                    "Error de escritura al insertar pasajero: " + e.getMessage()
             );
         }
     }
