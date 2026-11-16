@@ -19,7 +19,6 @@ import java.sql.PreparedStatement;
 public class OcupacionRepository extends GenericRepository<Ocupacion>{
 
 
-
     @Override
     protected Ocupacion create(ResultSet rs) throws SQLException {
 
@@ -35,6 +34,20 @@ public class OcupacionRepository extends GenericRepository<Ocupacion>{
 
         LocalDate checkIn = rs.getDate("check_in").toLocalDate();
         LocalDate checkOut = rs.getDate("check_out").toLocalDate();
+
+        Set<Pasajero> pasajeros = obtenerPasajeros(idOcupacion);
+
+        return new Ocupacion(
+                idOcupacion,
+                habitacion,
+                pasajeros,
+                checkIn,
+                checkOut
+        );
+    }
+
+    private Set<Pasajero> obtenerPasajeros(Integer idOcupacion)
+            throws SQLException {
 
         Set<Pasajero> pasajeros = new HashSet<>();
 
@@ -72,15 +85,8 @@ public class OcupacionRepository extends GenericRepository<Ocupacion>{
             }
         }
 
-        return new Ocupacion(
-                idOcupacion,
-                habitacion,
-                pasajeros,
-                checkIn,
-                checkOut
-        );
+        return pasajeros;
     }
-
 
     @Override
     public Ocupacion insert(Ocupacion element) throws RepositoryWriteException {
@@ -100,7 +106,7 @@ public class OcupacionRepository extends GenericRepository<Ocupacion>{
             return new Ocupacion(
                     idOcupacion,
                     element.getHabitacion(),
-                    new HashSet<>(element.getPasajeros()),
+                    new HashSet<>(),
                     element.getCheckIn(),
                     element.getCheckOut()
             );
