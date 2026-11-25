@@ -71,4 +71,40 @@ public class OcupacionesController extends GenericController<Ocupacion>
     {
         return new OcupacionRepository().obtenerOcupacionesDelDia(fecha);
     }
+
+    public double calcularIngresosEstimados()
+    {
+        double total = 0;
+
+        for (Ocupacion o : this.getAll())
+        {
+            total += o.calcularImporteTotal();
+        }
+
+        return total;
+    }
+
+    public long calcularTotalNoches()
+    {
+        long total = 0;
+
+        for (Ocupacion o : this.getAll())
+        {
+            total += o.calcularCantidadNoches();
+        }
+
+        return total;
+    }
+
+    public double calcularIngresoPromedio()
+    {
+        int cantidad = this.getAll().size();
+
+        if (cantidad == 0)
+        {
+            return 0;
+        }
+
+        return this.calcularIngresosEstimados() / cantidad;
+    }
 }

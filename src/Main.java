@@ -129,7 +129,8 @@ void createMenus(MenuController menus)
                     "Borrar ocupaciones",
                     "Listar ocupaciones",
                     "Listar ocupaciones del día",
-                    "Consultar importe de estadia"
+                    "Consultar importe de estadia",
+                    "Informe de ingresos estimados"
             )
     ));
 
@@ -1100,6 +1101,41 @@ void crudOcupaciones(MenuController menus, ScannerView input, OcupacionesControl
 
                     System.out.println("Importe total: $" + o.calcularImporteTotal());
                 }
+            }
+            case 6 ->
+            {
+                System.out.println("===== INFORME DE INGRESOS ESTIMADOS =====");
+
+                System.out.println("\n--- DETALLE DE ESTADIAS ---");
+
+                for (Ocupacion o : controller.getAll())
+                {
+                    System.out.println("ID ocupacion: " + o.getIdOcupacion());
+
+                    System.out.println("Habitacion: " + o.getHabitacionString());
+
+                    System.out.println("Check-in: " + o.getCheckIn());
+
+                    System.out.println("Check-out: " + o.getCheckOut());
+
+                    System.out.println("Cantidad de noches: "
+                            + o.calcularCantidadNoches());
+
+                    System.out.println("Importe: $"
+                            + o.calcularImporteTotal());
+
+                    System.out.println("-------------------------");
+                }
+
+                System.out.println("\n--- RESUMEN GENERAL ---");
+
+                System.out.println("Cantidad de estadias: " + controller.getAll().size());
+
+                System.out.println("Total de noches: " + controller.calcularTotalNoches());
+
+                System.out.printf("Ingresos totales estimados: $%.2f%n", controller.calcularIngresosEstimados());
+
+                System.out.printf("Ingreso promedio por estadia: $%.2f%n", controller.calcularIngresoPromedio());
             }
         }
     }
