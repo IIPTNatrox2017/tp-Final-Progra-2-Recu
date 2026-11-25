@@ -3,6 +3,11 @@ package Controllers;
 import Exceptions.RepositoryWriteException;
 import Models.Pasajero;
 import Repositories.PasajeroRepository;
+import Models.Reserva;
+import Models.Ocupacion;
+import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 public class PasajerosController extends GenericController<Pasajero>
 {
@@ -58,5 +63,21 @@ public class PasajerosController extends GenericController<Pasajero>
     protected void updateRepository(Pasajero element) throws RepositoryWriteException
     {
         new PasajeroRepository().update(element);
+    }
+
+    public ArrayList<Reserva> obtenerHistorialReservas(Pasajero pasajero, ReservasController reservas)
+    {
+        ArrayList<Reserva> historial = new ArrayList<>();
+
+        for (Reserva reserva : reservas.getAll())
+        {
+            if (reservas.obtenerPasajeros(reserva.getIdReserva())
+                    .contains(pasajero.getIdPasajero()))
+            {
+                historial.add(reserva);
+            }
+        }
+
+        return historial;
     }
 }
