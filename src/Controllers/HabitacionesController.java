@@ -3,6 +3,7 @@ package Controllers;
 import Exceptions.RepositoryWriteException;
 import Models.Habitacion;
 import Repositories.HabitacionRepository;
+import java.util.ArrayList;
 
 public class HabitacionesController extends GenericController<Habitacion>
 {
@@ -50,5 +51,35 @@ public class HabitacionesController extends GenericController<Habitacion>
     protected void updateRepository(Habitacion element) throws RepositoryWriteException
     {
         new HabitacionRepository().update(element);
+    }
+
+    public ArrayList<Habitacion> buscarPorCapacidad(int capacidad)
+    {
+        ArrayList<Habitacion> habitaciones = new ArrayList<>();
+
+        for (Habitacion h : this.getAll())
+        {
+            if (h.getCapacidad() >= capacidad)
+            {
+                habitaciones.add(h);
+            }
+        }
+
+        return habitaciones;
+    }
+
+    public ArrayList<Habitacion> buscarPorPrecio(double minimo, double maximo)
+    {
+        ArrayList<Habitacion> habitaciones = new ArrayList<>();
+
+        for (Habitacion h : this.getAll())
+        {
+            if (h.getPrecio() >= minimo && h.getPrecio() <= maximo)
+            {
+                habitaciones.add(h);
+            }
+        }
+
+        return habitaciones;
     }
 }

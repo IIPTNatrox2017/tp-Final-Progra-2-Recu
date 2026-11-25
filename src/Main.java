@@ -94,8 +94,19 @@ void createMenus(MenuController menus)
     );
     
     addCrudMenu(menus, MenuKey.USUARIOS, "Usuarios");
-    addCrudMenu(menus, MenuKey.HABITACIONES, "Habitaciones");
     addCrudMenu(menus, MenuKey.PERSONAS, "Personas");
+
+    menus.addMenu(MenuKey.HABITACIONES.getValue(), new Menu(
+            "Habitaciones",
+            items(
+                    "Crear habitaciones",
+                    "Modificar habitaciones",
+                    "Borrar habitaciones",
+                    "Listar habitaciones",
+                    "Buscar por capacidad",
+                    "Buscar por precio"
+            )
+    ));
 
     menus.addMenu(MenuKey.PASAJEROS.getValue(), new Menu(
             "Pasajeros",
@@ -458,6 +469,56 @@ void crudHabitaciones(MenuController menus, ScannerView input, HabitacionesContr
                 }
             }
             case 3 -> controller.getAll().forEach(System.out::println);
+            case 4 ->
+            {
+                int capacidad = input.getInteger("Capacidad minima: ");
+
+                if (capacidad <= 0)
+                {
+                    System.out.println("La capacidad debe ser mayor a cero.");
+                }
+                else
+                {
+                    ArrayList<Habitacion> resultado = controller.buscarPorCapacidad(capacidad);
+
+                    if (resultado.isEmpty())
+                    {
+                        System.out.println("No se encontraron habitaciones.");
+                    }
+                    else
+                    {
+                        for (Habitacion h : resultado)
+                        {
+                            System.out.println(h);
+                        }
+                    }
+                }
+            }
+            case 5 ->
+            {
+                double minimo = input.getDouble("Precio minimo: ");
+                double maximo = input.getDouble("Precio maximo: ");
+
+                if (minimo < 0 || maximo < minimo)
+                {
+                    System.out.println("Rango de precios invalido.");
+                }
+                else
+                {
+                    ArrayList<Habitacion> resultado = controller.buscarPorPrecio(minimo, maximo);
+                    if (resultado.isEmpty())
+                    {
+                        System.out.println("No se encontraron habitaciones.");
+                    }
+                    else
+                    {
+                        for (Habitacion h : resultado)
+                        {
+                            System.out.println(h);
+                        }
+                    }
+                }
+            }
         }
     }
 }
