@@ -60,6 +60,7 @@ void main()
     catch (RuntimeException e)
     {
         System.out.println("No se pudo iniciar la aplicación: " + e.getMessage());
+        e.printStackTrace();
     }
     finally
     {
@@ -95,7 +96,17 @@ void createMenus(MenuController menus)
     addCrudMenu(menus, MenuKey.USUARIOS, "Usuarios");
     addCrudMenu(menus, MenuKey.HABITACIONES, "Habitaciones");
     addCrudMenu(menus, MenuKey.PERSONAS, "Personas");
-    addCrudMenu(menus, MenuKey.PASAJEROS, "Pasajeros");
+
+    menus.addMenu(MenuKey.PASAJEROS.getValue(), new Menu(
+            "Pasajeros",
+            items(
+                    "Crear pasajeros",
+                    "Modificar pasajeros",
+                    "Borrar pasajeros",
+                    "Listar pasajeros",
+                    "Consultar historial"
+            )
+    ));
 
     menus.addMenu(MenuKey.OCUPACIONES.getValue(), new Menu(
             "Ocupaciones",
@@ -261,7 +272,7 @@ void showMainMenu(MenuController menus, ScannerView input, Usuario usuario,
                 case 0 -> crudUsuarios(menus, input, usuarios, personas);
                 case 1 -> crudHabitaciones(menus, input, habitaciones);
                 case 2 -> crudPersonas(menus, input, personas);
-                case 3 -> crudPasajeros(menus, input, pasajeros, personas);
+                case 3 -> crudPasajeros(menus, input, pasajeros, personas, reservas, ocupaciones);
                 case 4 -> crudReservas(menus, input, reservas, habitaciones, ocupaciones, pasajeros);
                 case 5 -> crudOcupaciones(menus, input, ocupaciones, habitaciones, pasajeros);
             }
@@ -270,7 +281,7 @@ void showMainMenu(MenuController menus, ScannerView input, Usuario usuario,
         {
             switch (option)
             {
-                case 0 -> crudPasajeros(menus, input, pasajeros, personas);
+                case 0 -> crudPasajeros(menus, input, pasajeros, personas, reservas, ocupaciones);
                 case 1 -> crudHabitaciones(menus, input, habitaciones);
                 case 2 -> crudReservas(menus, input, reservas, habitaciones, ocupaciones, pasajeros);
                 case 3 -> crudOcupaciones(menus, input, ocupaciones, habitaciones, pasajeros);
@@ -601,9 +612,7 @@ void editOcupacionAttribute(MenuController menus, ScannerView input, Ocupacion o
     }
 }
 
-void crudPasajeros(MenuController menus, ScannerView input, PasajerosController controller,
-                          PersonasController personas
-)
+void crudPasajeros(MenuController menus, ScannerView input, PasajerosController controller, PersonasController personas, ReservasController reservas, OcupacionesController ocupaciones)
 {
     while (true)
     {
@@ -654,6 +663,44 @@ void crudPasajeros(MenuController menus, ScannerView input, PasajerosController 
                 }
             }
             case 3 -> controller.getAll().forEach(System.out::println);
+            case 4 ->
+            {
+                Pasajero p = selectElement(menus, "Seleccione un pasajero", controller.getAll());
+
+                if (p != null)
+                {
+                    ArrayList<Reserva> historialReservas = controller.obtenerHistorialReservas(p, reservas);
+
+                    ArrayList<Ocupacion> historialOcupaciones = controller.obtenerHistorialOcupaciones(p, ocupaciones);
+
+                    System.out.println("===== HISTORIAL =====");
+                    System.out.println("Nombre: " + p.getNombre());
+                    System.out.println("DNI: " + p.getDni());
+
+                    System.out.println("\n--- RESERVAS ---");
+
+                    for (Reserva r : historialReservas)
+                    {
+                        System.out.println(r);
+                    }
+
+                    System.out.println("\n--- OCUPACIONES REGISTRADAS ---");
+
+                    for (Ocupacion o : historialOcupaciones)
+                    {
+                        System.out.println(o);
+                    }
+
+                    System.out.println("Total de reservas: "
+                            + historialReservas.size());
+
+                    System.out.println("Total de estadias: "
+                            + historialOcupaciones.size());
+
+                    System.out.println("Total de noches registradas: "
+                            + controller.calcularTotalNoches(historialOcupaciones));
+                }
+            }
         }
     }
 }

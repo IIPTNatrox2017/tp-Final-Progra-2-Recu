@@ -81,8 +81,7 @@ public class PasajerosController extends GenericController<Pasajero>
         return historial;
     }
 
-    public ArrayList<Ocupacion> obtenerHistorialOcupaciones(
-            Pasajero pasajero, OcupacionesController ocupaciones)
+    public ArrayList<Ocupacion> obtenerHistorialOcupaciones(Pasajero pasajero, OcupacionesController ocupaciones)
     {
         ArrayList<Ocupacion> historial = new ArrayList<>();
 
@@ -90,13 +89,24 @@ public class PasajerosController extends GenericController<Pasajero>
         {
             if (ocupacion.getPasajero(pasajero.getIdPasajero()) != null)
             {
-                if (!ocupacion.getCheckOut().isAfter(LocalDate.now()))
-                {
-                    historial.add(ocupacion);
-                }
+                historial.add(ocupacion);
             }
         }
 
         return historial;
     }
+
+    public long calcularTotalNoches(ArrayList<Ocupacion> historial)
+    {
+        long total = 0;
+
+        for (Ocupacion ocupacion : historial)
+        {
+            total += ChronoUnit.DAYS.between(ocupacion.getCheckIn(), ocupacion.getCheckOut()
+            );
+        }
+
+        return total;
+    }
 }
+
