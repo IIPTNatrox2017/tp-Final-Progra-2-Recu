@@ -6,4 +6,8 @@ public class MenuDoNotExistsException extends RuntimeException
     {
         super(message);
     }
+    public MenuDoNotExistsException()
+    {
+        super("No such menu exists!");
+    }
 }
