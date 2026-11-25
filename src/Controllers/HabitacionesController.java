@@ -4,6 +4,9 @@ import Exceptions.RepositoryWriteException;
 import Models.Habitacion;
 import Repositories.HabitacionRepository;
 import java.util.ArrayList;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class HabitacionesController extends GenericController<Habitacion>
 {
@@ -79,6 +82,38 @@ public class HabitacionesController extends GenericController<Habitacion>
                 habitaciones.add(h);
             }
         }
+
+        return habitaciones;
+    }
+
+    public ArrayList<Habitacion> ordenarPorPrecioAscendente()
+    {
+        ArrayList<Habitacion> habitaciones = new ArrayList<>(this.getAll());
+
+        Collections.sort(habitaciones, new Comparator<Habitacion>()
+        {
+            @Override
+            public int compare(Habitacion h1, Habitacion h2)
+            {
+                return Double.compare(h1.getPrecio(), h2.getPrecio());
+            }
+        });
+
+        return habitaciones;
+    }
+
+    public ArrayList<Habitacion> ordenarPorPrecioDescendente()
+    {
+        ArrayList<Habitacion> habitaciones = new ArrayList<>(this.getAll());
+
+        Collections.sort(habitaciones, new Comparator<Habitacion>()
+        {
+            @Override
+            public int compare(Habitacion h1, Habitacion h2)
+            {
+                return Double.compare(h2.getPrecio(), h1.getPrecio());
+            }
+        });
 
         return habitaciones;
     }

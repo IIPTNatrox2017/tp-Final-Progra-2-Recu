@@ -104,7 +104,9 @@ void createMenus(MenuController menus)
                     "Borrar habitaciones",
                     "Listar habitaciones",
                     "Buscar por capacidad",
-                    "Buscar por precio"
+                    "Buscar por precio",
+                    "Ordenar por precio ascendente",
+                    "Ordenar por precio descendente"
             )
     ));
 
@@ -517,6 +519,25 @@ void crudHabitaciones(MenuController menus, ScannerView input, HabitacionesContr
                             System.out.println(h);
                         }
                     }
+                }
+            }
+            case 6 ->
+            {
+                ArrayList<Habitacion> habitaciones = controller.ordenarPorPrecioAscendente();
+
+                for (Habitacion h : habitaciones)
+                {
+                    System.out.println(h);
+                }
+            }
+            case 7 ->
+            {
+                ArrayList<Habitacion> habitaciones =
+                        controller.ordenarPorPrecioDescendente();
+
+                for (Habitacion h : habitaciones)
+                {
+                    System.out.println(h);
                 }
             }
         }
