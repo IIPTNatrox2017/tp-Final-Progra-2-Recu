@@ -80,4 +80,23 @@ public class PasajerosController extends GenericController<Pasajero>
 
         return historial;
     }
+
+    public ArrayList<Ocupacion> obtenerHistorialOcupaciones(
+            Pasajero pasajero, OcupacionesController ocupaciones)
+    {
+        ArrayList<Ocupacion> historial = new ArrayList<>();
+
+        for (Ocupacion ocupacion : ocupaciones.getAll())
+        {
+            if (ocupacion.getPasajero(pasajero.getIdPasajero()) != null)
+            {
+                if (!ocupacion.getCheckOut().isAfter(LocalDate.now()))
+                {
+                    historial.add(ocupacion);
+                }
+            }
+        }
+
+        return historial;
+    }
 }
