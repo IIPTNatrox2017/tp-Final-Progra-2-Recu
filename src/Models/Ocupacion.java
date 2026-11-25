@@ -3,6 +3,7 @@ package Models;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
+import java.time.temporal.ChronoUnit;
 
 public class Ocupacion
 {
@@ -134,5 +135,15 @@ public class Ocupacion
                 ", checkIn=" + this.getCheckIn() +
                 ", checkOut=" + this.getCheckOut() +
                 '}';
+    }
+
+    public long calcularCantidadNoches()
+    {
+        return ChronoUnit.DAYS.between(this.checkIn, this.checkOut);
+    }
+
+    public double calcularImporteTotal()
+    {
+        return this.calcularCantidadNoches() * this.habitacion.getPrecio();
     }
 }

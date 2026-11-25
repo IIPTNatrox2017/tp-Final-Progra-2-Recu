@@ -128,7 +128,8 @@ void createMenus(MenuController menus)
                     "Modificar ocupaciones",
                     "Borrar ocupaciones",
                     "Listar ocupaciones",
-                    "Listar ocupaciones del día"
+                    "Listar ocupaciones del día",
+                    "Consultar importe de estadia"
             )
     ));
 
@@ -973,9 +974,7 @@ void crudReservas(MenuController menus, ScannerView input, ReservasController co
             }
         }
     }
-void crudOcupaciones(MenuController menus, ScannerView input, OcupacionesController controller,
-                            HabitacionesController habitaciones, PasajerosController pasajeros
-)
+void crudOcupaciones(MenuController menus, ScannerView input, OcupacionesController controller, HabitacionesController habitaciones, PasajerosController pasajeros)
 {
     while (true)
     {
@@ -1079,7 +1078,29 @@ void crudOcupaciones(MenuController menus, ScannerView input, OcupacionesControl
                     }
                 }
             }
+            case 5 ->
+            {
+                Ocupacion o = selectElement(menus, "Seleccione una ocupacion", controller.getAll());
 
+                if (o != null)
+                {
+                    System.out.println("===== IMPORTE DE ESTADIA =====");
+
+                    System.out.println("Habitacion: " + o.getHabitacionString());
+
+                    System.out.println("Pasajeros: " + o.getPasajerosNombre());
+
+                    System.out.println("Check-in: " + o.getCheckIn());
+
+                    System.out.println("Check-out: " + o.getCheckOut());
+
+                    System.out.println("Cantidad de noches: " + o.calcularCantidadNoches());
+
+                    System.out.println("Precio por noche: $" + o.getHabitacion().getPrecio());
+
+                    System.out.println("Importe total: $" + o.calcularImporteTotal());
+                }
+            }
         }
     }
 }
